@@ -37,6 +37,7 @@ tree_list
 			}
 		}
 	}
+	leaf = balance_tree(leaf);
 	return leaf;
 }
 
@@ -56,12 +57,12 @@ tree_list
 *balance_tree(tree_list *tree) {
 	if(tree != NULL) {
 		tree_list *root = NULL;
-		if (calculate_side_leafs(tree->left) < calculate_side_leafs(tree->right)) {
+		if ((calculate_side_leafs(tree->right) - calculate_side_leafs(tree->left)) > 2) {
 			root = tree->right;
 			tree->right = root->left;
 			root->left = tree;
 			tree = root;
-		} else if (calculate_side_leafs(tree->left) > calculate_side_leafs(tree->right)) {
+		} else if ((calculate_side_leafs(tree->left) - calculate_side_leafs(tree->right)) > 2) {
 			root = tree->left;
 			tree->left = root->right;
 			root->right = tree;
@@ -69,6 +70,51 @@ tree_list
 		}
 	}
 	return tree;
+}
+
+tree_list 
+*find_leaf(tree_list *tree, char *value) {
+	tree_list *tmp = NULL;
+	if (tree != NULL)
+	{
+		if (strcmp(tree->value, value) == 0)
+		{
+			tmp = tree;
+		} else  {
+			if (get_mass(tree->value) > get_mass(value))
+			{
+				tmp = find_leaf(tree->left, value);
+			} else {
+				tmp = find_leaf(tree->right, value);
+			}
+		}
+	}
+	return tmp;
+}
+
+void
+delete_leaf(tree_list *tree, char *value) {
+	if (tree != NULL)
+	{
+		tree_list *vl = find_leaf(tree, value);
+		tree_list *pre_end_leaf=NULL;
+		if(vl->left == NULL && vl->right == NULL) {
+			free(vl);
+		} else {
+			for (tree_list *nd = vl->right; nd != NULL; nd = nd->left) {
+				if (nd->left->left == NULL && nd->left->right == NULL)
+				{
+					pre_end_leaf = nd;
+					break;
+				}
+			}
+			pre_end_leaf->left->left = vl->left;
+			pre_end_leaf->left->right = vl->right;
+			vl = pre_end_leaf->left;
+			pre_end_leaf->left = NULL;
+		}
+	} 
+
 }
 
 int main(int argc, char const *argv[])
@@ -81,8 +127,8 @@ int main(int argc, char const *argv[])
 	insert(lst, "fish");
 	insert(lst, "snake");
 	insert(lst, "lisard");
-
-	lst = balance_tree(lst);
+	lst = delete_leaf(lst, "cat");
+	//lst = balance_tree(lst);
 	printf("%s\n", lst->left->value);
 
 

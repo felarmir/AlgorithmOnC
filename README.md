@@ -4,3 +4,5 @@ Sample algorithms in C
 - Comb sort
 - Linked list
 - Hash Map
+- Tree
+- Thread 
